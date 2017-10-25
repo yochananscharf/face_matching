@@ -17,3 +17,16 @@ face_recognition_model = dlib.face_recognition_model_v1('dlib_face_recognition_r
 # To avoid false negatives (i.e. faces of the same person doesn't match), use higher value
 # 0.5-0.6 works well
 TOLERANCE = 0.6
+
+# This function will take an image and return its face encodings using the neural network
+def get_face_encodings(path_to_image):
+    # Load image using scipy
+    image = scipy.misc.imread(path_to_image)
+    # Detect faces using the face detector
+    detected_faces = face_detector(image, 1)
+    # Get pose/landmarks of those faces
+    # Will be used as an input to the function that computes face encodings
+    # This allows the neural network to be able to produce similar numbers for faces of the same people, regardless of camera angle and/or face positioning in the image
+    shapes_faces = [shape_predictor(image, face) for face in detected_faces]
+    # For every face detected, compute the face encodings
+    return [np.array(face_recognition_model.compute_face_descriptor(image, face_pose, 1)) for face_pose in shapes_faces]
